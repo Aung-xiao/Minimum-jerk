@@ -90,19 +90,24 @@ Eigen::MatrixXd TrajectoryGeneratorWaypoint::QGeneration(int p_num1d,double T){
       Q(i,l)=(i*(i-1)*(i-2)*l*(l-1)*(l-2))/(i+l-5)*pow(T,i+l-5);
     }
   }
-  cout<<"q:"<<endl;
-  cout<<Q<<endl;
+  cout<<"q:"<<Q<<endl;
   return Q;
 }
 
 Eigen::MatrixXd TrajectoryGeneratorWaypoint::AGeneration(int p_num1d, int d_order, double T_end) {
   MatrixXd A= MatrixXd::Zero(p_num1d,  p_num1d);
-  for(int i=d_order;i<p_num1d;i++)
+  for(int k=0;k<d_order;k++)
   {
-    A(i,i)=fac(i)/fac(i-d_order)*pow(T_end,i-d_order);
+    for(int i=k;i<p_num1d;i++)
+      A(k,i)=fac(i)/fac(i-k)*pow(0,i-k);
   }
-  cout<<"a:"<<endl;
-  cout<<A<<endl;
+  for(int k=d_order;k<d_order*2;k++)
+  {
+    int K=k-d_order;
+    for(int i=K;i<p_num1d;i++)
+      A(k,i)=fac(i)/fac(i-K)*pow(T_end,i-K);
+  }
+  cout<<"a:"<<A<<endl;
   return A;
 }
 
