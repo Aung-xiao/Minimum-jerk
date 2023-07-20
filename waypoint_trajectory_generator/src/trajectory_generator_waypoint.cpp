@@ -37,9 +37,8 @@ Eigen::MatrixXd TrajectoryGeneratorWaypoint::PolyQPGeneration(
     VectorXd Px(p_num1d * m), Py(p_num1d * m), Pz(p_num1d * m);
 
     MatrixXd Q=MatrixXd::Zero(p_num1d*m, p_num1d*m);
-    MatrixXd A=MatrixXd::Zero((p_num1d+1)*m, p_num1d*m);
+    MatrixXd A=MatrixXd::Zero((m+1)+(m-1)*d_order, p_num1d*m);
     MatrixXd P=MatrixXd::Zero(p_num1d*m, 1);
-    MatrixXd Deq=MatrixXd::Zero(p_num1d*(m+1), 3);
 
     for(int i=0;i<m;i++)
     {
@@ -61,12 +60,9 @@ Eigen::MatrixXd TrajectoryGeneratorWaypoint::PolyQPGeneration(
 //    P_=P.sparseView();
 //    A_=A.sparseView();
 //
-//    for(int i=0;i<3;i++)
-//    {
-//      MatrixXd deq_single=DeqGeneration(Path.block(0,i,m,1),
-//                                          Vel.block(0,i,2,1),
-//                                          Acc.block(0,i,2,1),
-//                                          p_num1d,m);
+    for(int i=0;i<3;i++)
+    {
+      MatrixXd deq_s=DeqGeneration(Path.col(i),d_order,m);
 //      l_d=deq_single;
 //      u_d=deq_single;
 //      qpSolver_.setMats(P_, q_d, A_, l_d, u_d);
@@ -76,7 +72,7 @@ Eigen::MatrixXd TrajectoryGeneratorWaypoint::PolyQPGeneration(
 //        ROS_ERROR("fail to solve QP!");
 //      Eigen::VectorXd sol = qpSolver_.getPrimalSol();
 //      MaxtrixInsert(PolyCoeff,sol,0,i);
-//    }
+    }
 
     return PolyCoeff;
 }
@@ -90,7 +86,7 @@ Eigen::MatrixXd TrajectoryGeneratorWaypoint::QGeneration(int p_num1d,double T){
       Q(i,l)=(i*(i-1)*(i-2)*l*(l-1)*(l-2))/(i+l-5)*pow(T,i+l-5);
     }
   }
-  cout<<"q:"<<Q<<endl;
+//  cout<<"q:"<<Q<<endl;
   return Q;
 }
 
@@ -107,7 +103,7 @@ Eigen::MatrixXd TrajectoryGeneratorWaypoint::AGeneration(int p_num1d, int d_orde
     for(int i=K;i<p_num1d;i++)
       A(k,i)=fac(i)/fac(i-K)*pow(T_end,i-K);
   }
-  cout<<"a:"<<A<<endl;
+//  cout<<"a:"<<A<<endl;
   return A;
 }
 
@@ -130,18 +126,11 @@ void TrajectoryGeneratorWaypoint::MaxtrixInsert(Eigen::MatrixXd& M,Eigen::Matrix
   }
 }
 
-Eigen::MatrixXd TrajectoryGeneratorWaypoint::DeqGeneration(Eigen::MatrixXd Path,Eigen::MatrixXd Vel,Eigen::MatrixXd Acc,int p_num1d,int m)
+Eigen::MatrixXd TrajectoryGeneratorWaypoint::DeqGeneration(Eigen::MatrixXd Path,int d_order,int m)
 {
-  MatrixXd Deq=MatrixXd::Zero(p_num1d*(m+1),1);
-  int l=0;
-  for(int i=0;i<p_num1d*m;i+=p_num1d)
-  {
-    Deq(i+p_num1d/2+1,1)=Path(l);
-    l++;
-  }
-  Deq(0+p_num1d/2+2,1)=Vel(0);
-  Deq(0+p_num1d/2+3)=Acc(0);
-  Deq(p_num1d*(m-1)+p_num1d/2+2,1)=Vel(1);
-  Deq(p_num1d*(m-1)+p_num1d/2+3)=Acc(1);
+  MatrixXd Deq=MatrixXd::Zero((m+1)+(m-1)*d_order,1);
+  for(int i=0;i<m+1;i++)
+    Deq(i,0)=Path(i);
+//  cout<<"Deq:"<<Deq<<endl;
   return Deq;
 }

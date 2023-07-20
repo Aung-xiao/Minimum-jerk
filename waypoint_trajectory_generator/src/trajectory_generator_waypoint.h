@@ -25,7 +25,7 @@ class TrajectoryGeneratorWaypoint {
         static Eigen::MatrixXd QGeneration(int p_num1d,double T);
         Eigen::MatrixXd AGeneration(int p_num1d,int d_order,double T_end);
         static void MaxtrixInsert(Eigen::MatrixXd& M,Eigen::MatrixXd m,int row,int col);
-        static Eigen::MatrixXd DeqGeneration(Eigen::MatrixXd Path,Eigen::MatrixXd Vel,Eigen::MatrixXd Acc,int p_num1d,int m);
+        static Eigen::MatrixXd DeqGeneration(Eigen::MatrixXd Path,int d_order,int m);
         int Factorial(int x);
         Eigen::SparseMatrix<double> P_, A_;
         Eigen::VectorXd q_d,l_d,u_d;
