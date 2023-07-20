@@ -39,12 +39,13 @@ Eigen::MatrixXd TrajectoryGeneratorWaypoint::PolyQPGeneration(
     MatrixXd Q=MatrixXd::Zero(p_num1d*m, p_num1d*m);
     MatrixXd A=MatrixXd::Zero((m+1)+(m-1)*d_order, p_num1d*m);
     MatrixXd P=MatrixXd::Zero(p_num1d*m, 1);
+    MatrixXd A_Der=ADerGeneration(m,p_num1d,Time(m-1));
 
     for(int i=0;i<m;i++)
     {
 //      double T_start=(i>0?Time(i-1):0);
       MatrixXd q=QGeneration(p_num1d,Time(i));
-      MatrixXd a=AGeneration(p_num1d,d_order,Time(i));
+      MatrixXd a_con=AConGeneration(p_num1d,d_order,Time(i));
 //      MatrixXd a_next=AGeneration(p_num1d,d_order,T_next);
 //      MaxtrixInsert(Q,q,(i-1)*p_num1d,(i-1)*p_num1d);
 //      if(i==1)
@@ -90,7 +91,7 @@ Eigen::MatrixXd TrajectoryGeneratorWaypoint::QGeneration(int p_num1d,double T){
   return Q;
 }
 
-Eigen::MatrixXd TrajectoryGeneratorWaypoint::AGeneration(int p_num1d, int d_order, double T_end) {
+Eigen::MatrixXd TrajectoryGeneratorWaypoint::AConGeneration(int p_num1d, int d_order, double T_end) {
   MatrixXd A= MatrixXd::Zero(p_num1d,  p_num1d);
   for(int k=0;k<d_order;k++)
   {
@@ -105,6 +106,16 @@ Eigen::MatrixXd TrajectoryGeneratorWaypoint::AGeneration(int p_num1d, int d_orde
   }
 //  cout<<"a:"<<A<<endl;
   return A;
+}
+
+Eigen::MatrixXd TrajectoryGeneratorWaypoint::ADerGeneration(int m, int p_num1d,double final_T) {
+  MatrixXd A_Der= MatrixXd::Zero((m+1),  p_num1d*m);
+  for(int i=0;i<m;i++)
+    A_Der(i,i*p_num1d)=1;
+  for(int i=0;i<p_num1d;i++)
+    A_Der(m,i+p_num1d*(m-1))=pow(final_T,i);
+  cout<<"A_Der:"<<A_Der<<endl;
+  return A_Der;
 }
 
 int TrajectoryGeneratorWaypoint::fac(int x) {
