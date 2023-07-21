@@ -37,16 +37,14 @@ Eigen::MatrixXd TrajectoryGeneratorWaypoint::PolyQPGeneration(
     VectorXd Px(p_num1d * m), Py(p_num1d * m), Pz(p_num1d * m);
 
     MatrixXd Q=MatrixXd::Zero(p_num1d*m, p_num1d*m);
-    MatrixXd A=MatrixXd::Zero((m+1)+(m-1)*d_order, p_num1d*m);
+    MatrixXd A=AGeneration(m,p_num1d,d_order,Time(m-1));
     MatrixXd P=MatrixXd::Zero(p_num1d*m, 1);
-    MatrixXd A_Der=ADerGeneration(m,p_num1d,Time(m-1));
 
     for(int i=0;i<m;i++)
     {
-//      double T_start=(i>0?Time(i-1):0);
       MatrixXd q=QGeneration(p_num1d,Time(i));
       MatrixXd a_con=AConGeneration(p_num1d,d_order,Time(i));
-//      MaxtrixInsert(Q,q,(i-1)*p_num1d,(i-1)*p_num1d);
+      matrixFill(Q,q,i*p_num1d,i*p_num1d);
 //      if(i==1)
 //        MaxtrixInsert(A,a,0,0);
 //      else if(i==m)
@@ -57,6 +55,8 @@ Eigen::MatrixXd TrajectoryGeneratorWaypoint::PolyQPGeneration(
 //        MaxtrixInsert(A,-a_next,i*p_num1d,i*p_num1d);
 //      }
     }
+//    cout<<"Q:"<<Q<<endl;
+
 //    P_=P.sparseView();
 //    A_=A.sparseView();
 //
@@ -104,14 +104,14 @@ Eigen::MatrixXd TrajectoryGeneratorWaypoint::AConGeneration(int p_num1d, int d_o
   return A_con;
 }
 
-Eigen::MatrixXd TrajectoryGeneratorWaypoint::ADerGeneration(int m, int p_num1d,double final_T) {
-  MatrixXd A_Der= MatrixXd::Zero((m+1),  p_num1d*m);
+Eigen::MatrixXd TrajectoryGeneratorWaypoint::AGeneration(int m, int p_num1d, int d_order,double final_T) {
+  MatrixXd A=MatrixXd::Zero((m+1)+(m-1)*d_order, p_num1d*m);
   for(int i=0;i<m;i++)
-    A_Der(i,i*p_num1d)=1;
+    A(i,i*p_num1d)=1;
   for(int i=0;i<p_num1d;i++)
-    A_Der(m,i+p_num1d*(m-1))=pow(final_T,i);
-//  cout<<"A_Der:"<<A_Der<<endl;
-  return A_Der;
+    A(m,i+p_num1d*(m-1))=pow(final_T,i);
+//  cout<<"A_Der:"<<A<<endl;
+  return A;
 }
 
 Eigen::MatrixXd TrajectoryGeneratorWaypoint::DeqGeneration(Eigen::MatrixXd Path,int d_order,int m)
@@ -123,6 +123,17 @@ Eigen::MatrixXd TrajectoryGeneratorWaypoint::DeqGeneration(Eigen::MatrixXd Path,
   return Deq;
 }
 
+void TrajectoryGeneratorWaypoint::matrixFill(Eigen::MatrixXd& M,Eigen::MatrixXd m,int row,int col) //非常不优雅，要改！！！
+{
+  for(int i=row;i<row+m.rows();i++)
+  {
+    for(int l=col;l<col+m.cols();l++)
+    {
+      M(i,l)=m(i-row,l-col);
+    }
+  }
+}
+
 int TrajectoryGeneratorWaypoint::fac(int x) {
   int f;
   if(x==0 || x==1)
@@ -130,15 +141,5 @@ int TrajectoryGeneratorWaypoint::fac(int x) {
   else
     f=fac(x-1)*x;
   return f;
-}
-void TrajectoryGeneratorWaypoint::MaxtrixInsert(Eigen::MatrixXd& M,Eigen::MatrixXd m,int row,int col)
-{
-  for(int i=row+m.rows();i>=m.rows();i--)
-  {
-    for(int l=col+m.cols();l>=m.cols();l--)
-    {
-      M(i,l)=m(i-m.rows(),l-m.cols());
-    }
-  }
 }
 
