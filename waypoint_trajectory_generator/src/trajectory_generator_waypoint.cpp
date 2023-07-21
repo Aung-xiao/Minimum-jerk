@@ -51,18 +51,18 @@ Eigen::MatrixXd TrajectoryGeneratorWaypoint::PolyQPGeneration(
     }
     VectorXd q_d(p_num1d*m);
     int axis=3;
-    for(int i=0;i<axis;i++)
+    for(int l=0;l<axis;l++)
     {
-      VectorXd deq_s=DeqGeneration(Path.col(i),d_order,m);
+      VectorXd deq_s=DeqGeneration(Path.col(l),d_order,m);
       qpSolver_.setMats(Q, q_d, A, deq_s, deq_s);
       qpSolver_.solve();
       int ret = qpSolver_.getStatus();
       if (ret != 1)
         ROS_ERROR("fail to solve QP!");
       Eigen::VectorXd sol = qpSolver_.getPrimalSol();
-//      matrixFill(PolyCoeff,sol,0,i);
+      for(int i=0;i<m;i++)
+        matrixFill(PolyCoeff,sol.block(i*p_num1d,0,p_num1d,1).transpose(),i,l*p_num1d);
     }
-
     return PolyCoeff;
 }
 
