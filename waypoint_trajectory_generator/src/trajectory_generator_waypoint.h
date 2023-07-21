@@ -22,14 +22,13 @@ class TrajectoryGeneratorWaypoint {
             const Eigen::MatrixXd &Acc,
             const Eigen::VectorXd &Time);
         int fac(int x);
-        Eigen::MatrixXd QGeneration(int p_num1d,double T);
-        Eigen::MatrixXd AConGeneration(int p_num1d,int d_order,double T_end);
-        Eigen::MatrixXd AGeneration(int m, int p_num1d,int d_order,double final_T);
-        Eigen::MatrixXd DeqGeneration(Eigen::MatrixXd Path,int d_order,int m);
+        Eigen::SparseMatrix<double> QGeneration(int p_num1d,double T);
+        Eigen::SparseMatrix<double> AConGeneration(int p_num1d,int d_order,double T_end);
+        Eigen::SparseMatrix<double> AGeneration(int m, int p_num1d,int d_order,double final_T);
+        Eigen::VectorXd DeqGeneration(Eigen::MatrixXd Path,int d_order,int m);
         void matrixFill(Eigen::MatrixXd& M,Eigen::MatrixXd m,int row,int col);
+        void spareMatrixFill(Eigen::SparseMatrix<double>& M,Eigen::MatrixXd m,int row,int col);
         int Factorial(int x);
-        Eigen::SparseMatrix<double> P_, A_;
-        Eigen::VectorXd q_d,l_d,u_d;
         osqp::IOSQP qpSolver_;
 };
         
