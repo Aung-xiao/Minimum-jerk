@@ -43,19 +43,13 @@ Eigen::MatrixXd TrajectoryGeneratorWaypoint::PolyQPGeneration(
     for(int i=0;i<m;i++)
     {
       MatrixXd q=QGeneration(p_num1d,Time(i));
-      MatrixXd a_con=AConGeneration(p_num1d,d_order,Time(i));
       matrixFill(Q,q,i*p_num1d,i*p_num1d);
-//      if(i==1)
-//        MaxtrixInsert(A,a,0,0);
-//      else if(i==m)
-//        MaxtrixInsert(A,a_next,i*p_num1d,i*p_num1d);
-//      else
-//      {
-//        MaxtrixInsert(A,a,i*p_num1d,(i-1)*p_num1d);
-//        MaxtrixInsert(A,-a_next,i*p_num1d,i*p_num1d);
-//      }
+      if(i!=m-1)
+      {
+        MatrixXd a_con=AConGeneration(p_num1d,d_order,Time(i));
+        matrixFill(A,a_con,(m+1)+i*d_order,i*p_num1d);
+      }
     }
-//    cout<<"Q:"<<Q<<endl;
 
 //    P_=P.sparseView();
 //    A_=A.sparseView();
