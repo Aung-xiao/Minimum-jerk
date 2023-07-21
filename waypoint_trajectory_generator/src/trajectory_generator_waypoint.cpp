@@ -46,7 +46,6 @@ Eigen::MatrixXd TrajectoryGeneratorWaypoint::PolyQPGeneration(
 //      double T_start=(i>0?Time(i-1):0);
       MatrixXd q=QGeneration(p_num1d,Time(i));
       MatrixXd a_con=AConGeneration(p_num1d,d_order,Time(i));
-//      MatrixXd a_next=AGeneration(p_num1d,d_order,T_next);
 //      MaxtrixInsert(Q,q,(i-1)*p_num1d,(i-1)*p_num1d);
 //      if(i==1)
 //        MaxtrixInsert(A,a,0,0);
@@ -92,20 +91,17 @@ Eigen::MatrixXd TrajectoryGeneratorWaypoint::QGeneration(int p_num1d,double T){
 }
 
 Eigen::MatrixXd TrajectoryGeneratorWaypoint::AConGeneration(int p_num1d, int d_order, double T_end) {
-  MatrixXd A= MatrixXd::Zero(p_num1d,  p_num1d);
+  MatrixXd A_con= MatrixXd::Zero(d_order,  2*p_num1d);
   for(int k=0;k<d_order;k++)
   {
     for(int i=k;i<p_num1d;i++)
-      A(k,i)=fac(i)/fac(i-k)*pow(0,i-k);
+    {
+      A_con(k,i)=fac(i)/fac(i-k)*pow(T_end,i-k);
+      A_con(k,i+p_num1d)=(-1)*fac(i)/fac(i-k)*pow(T_end,i-k);
+    }
   }
-  for(int k=d_order;k<d_order*2;k++)
-  {
-    int K=k-d_order;
-    for(int i=K;i<p_num1d;i++)
-      A(k,i)=fac(i)/fac(i-K)*pow(T_end,i-K);
-  }
-//  cout<<"a:"<<A<<endl;
-  return A;
+//  cout<<"a_con:"<<A_con<<endl;
+  return A_con;
 }
 
 Eigen::MatrixXd TrajectoryGeneratorWaypoint::ADerGeneration(int m, int p_num1d,double final_T) {
@@ -114,17 +110,26 @@ Eigen::MatrixXd TrajectoryGeneratorWaypoint::ADerGeneration(int m, int p_num1d,d
     A_Der(i,i*p_num1d)=1;
   for(int i=0;i<p_num1d;i++)
     A_Der(m,i+p_num1d*(m-1))=pow(final_T,i);
-  cout<<"A_Der:"<<A_Der<<endl;
+//  cout<<"A_Der:"<<A_Der<<endl;
   return A_Der;
 }
 
+Eigen::MatrixXd TrajectoryGeneratorWaypoint::DeqGeneration(Eigen::MatrixXd Path,int d_order,int m)
+{
+  MatrixXd Deq=MatrixXd::Zero((m+1)+(m-1)*d_order,1);
+  for(int i=0;i<m+1;i++)
+    Deq(i,0)=Path(i);
+//  cout<<"Deq:"<<Deq<<endl;
+  return Deq;
+}
+
 int TrajectoryGeneratorWaypoint::fac(int x) {
-    int f;
-    if(x==0 || x==1)
-      f=1;
-    else
-      f=fac(x-1)*x;
-    return f;
+  int f;
+  if(x==0 || x==1)
+    f=1;
+  else
+    f=fac(x-1)*x;
+  return f;
 }
 void TrajectoryGeneratorWaypoint::MaxtrixInsert(Eigen::MatrixXd& M,Eigen::MatrixXd m,int row,int col)
 {
@@ -137,11 +142,3 @@ void TrajectoryGeneratorWaypoint::MaxtrixInsert(Eigen::MatrixXd& M,Eigen::Matrix
   }
 }
 
-Eigen::MatrixXd TrajectoryGeneratorWaypoint::DeqGeneration(Eigen::MatrixXd Path,int d_order,int m)
-{
-  MatrixXd Deq=MatrixXd::Zero((m+1)+(m-1)*d_order,1);
-  for(int i=0;i<m+1;i++)
-    Deq(i,0)=Path(i);
-//  cout<<"Deq:"<<Deq<<endl;
-  return Deq;
-}

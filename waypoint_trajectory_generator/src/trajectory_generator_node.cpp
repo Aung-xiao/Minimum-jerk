@@ -281,6 +281,6 @@ VectorXd timeAllocation( MatrixXd Path)
                            );
         time[i]=dist/(_Vel*0.80);
     }
-    cout<<"time:"<<time<<endl;
+//    cout<<"time:"<<time<<endl;
     return time;
 }
