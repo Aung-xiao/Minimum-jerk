@@ -1,10 +1,7 @@
 #include "trajectory_generator_waypoint.h"
 #include <stdio.h>
-#include <ros/ros.h>
 #include <ros/console.h>
 #include <iostream>
-#include <fstream>
-#include <string>
 
 using namespace std;    
 using namespace Eigen;
@@ -50,6 +47,7 @@ Eigen::MatrixXd TrajectoryGeneratorWaypoint::PolyQPGeneration(
       }
     }
     VectorXd q_d(p_num1d*m);
+    q_d.setZero();
     int axis=3;
     for(int l=0;l<axis;l++)
     {
@@ -85,7 +83,7 @@ Eigen::SparseMatrix<double> TrajectoryGeneratorWaypoint::AConGeneration(int p_nu
     for(int i=k;i<p_num1d;i++)
     {
       A_con.insert(k,i)=fac(i)/fac(i-k)*pow(T_end,i-k);
-      A_con.insert(k,i+p_num1d)=(-1)*fac(i)/fac(i-k)*pow(T_end,i-k);
+      A_con.insert(k,i+p_num1d)=(-1)*fac(i)/fac(i-k)*pow(0,i-k);
     }
   }
   return A_con;
